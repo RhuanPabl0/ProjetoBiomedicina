@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ProjetoBiomedicina</string>
+    <string-array name="tipos_exame">
+        <item>Exame de Sangue</item>
+        <item>Outro Tipo de Exame</item>
+    </string-array>
+</resources>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/fasipelogo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        android:src="@drawable/fasipe" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/txt_codigo"
+        android:layout_marginHorizontal="20dp"
+        android:text="Codigo do Profissional"
+        android:layout_below="@+id/fasipelogo"
+        />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/username"
+        android:layout_below="@+id/txt_codigo"
+        android:hint="Ex: 12345"
+        android:layout_margin="10dp"
+        android:padding="20dp"
+        android:drawablePadding="20dp"
+        />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/txt_senha"
+        android:layout_marginHorizontal="20dp"
+        android:text="Senha"
+        android:layout_below="@+id/username"
+        />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/password"
+        android:layout_below="@+id/txt_senha"
+        android:hint="******"
+        android:layout_margin="10dp"
+        android:padding="20dp"
+        android:inputType="textPassword"
+        android:drawablePadding="20dp"
+        />
+
+
+    <Button
+        android:id="@+id/btnLogin"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:backgroundTint="@color/green"
+        android:layout_below="@id/password"
+        android:text="Login"
+        />
+
+</RelativeLayout>

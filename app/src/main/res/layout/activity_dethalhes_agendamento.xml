@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/detalhesTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:layout_marginBottom="20dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ID"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/et_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:enabled="false" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nome do Exame"
+            android:textStyle="bold"
+             />
+
+        <EditText
+            android:id="@+id/et_nome_exame"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tipo"
+            android:textStyle="bold"
+             />
+
+        <EditText
+            android:id="@+id/editTextTipo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Tipo de Exame"
+            android:inputType="text"
+            android:maxLines="1" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Data Realizado"
+            android:textStyle="bold"
+             />
+
+        <EditText
+            android:id="@+id/et_dt_realizado"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="datetime" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ID Cliente"
+            android:textStyle="bold"
+             />
+
+        <EditText
+            android:id="@+id/et_id_cliente"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ID Informação de Referência"
+            android:textStyle="bold"
+             />
+
+        <EditText
+            android:id="@+id/et_id_info_referencia"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Data e Hora da Coleta"
+            android:textStyle="bold"
+             />
+
+        <EditText
+            android:id="@+id/et_data_hora_coleta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="datetime" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nome do Profissional"
+            android:textStyle="bold"
+             />
+
+        <EditText
+            android:id="@+id/et_nome_profissional"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Número de Amostras"
+            android:textStyle="bold"
+             />
+
+        <EditText
+            android:id="@+id/et_num_amostras"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Condições da Coleta"
+            android:textStyle="bold"
+             />
+
+        <EditText
+            android:id="@+id/et_condicoes_coleta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Identificação dos Tubos"
+            android:textStyle="bold"
+             />
+
+        <EditText
+            android:id="@+id/et_identificacao_tubos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tempo de Armazenamento"
+            android:textStyle="bold"
+             />
+
+        <EditText
+            android:id="@+id/et_tempo_armazenamento"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Condições de Transporte"
+            android:textStyle="bold"
+             />
+
+        <EditText
+            android:id="@+id/et_condicoes_transporte"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Observações"
+            android:textStyle="bold"
+             />
+
+        <EditText
+            android:id="@+id/et_observacoes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Reações Adversas"
+            android:textStyle="bold"
+             />
+
+        <EditText
+            android:id="@+id/et_reacoes_adversas"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Acompanhamento Adicional"
+            android:textStyle="bold"
+             />
+
+        <EditText
+            android:id="@+id/et_acompanhamento_adicional"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine" />
+
+        <Button
+            android:id="@+id/btn_salvar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Salvar"
+            android:layout_marginTop="24dp"/>
+    </LinearLayout>
+</ScrollView>

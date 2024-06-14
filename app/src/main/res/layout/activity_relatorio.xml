@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".RelatorioActivity"
+
+    android:gravity="center">
+
+    <EditText
+        android:id="@+id/campoBusca"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Buscar Paciente Por CPF"
+        android:backgroundTint="@android:color/white"
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="16dp"
+        android:padding="12dp"
+        android:inputType="textCapWords"
+        android:gravity="center"/>
+
+
+    <Button
+        android:id="@+id/btnBuscar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:drawablePadding="8dp"
+        android:text="Buscar"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"/>
+
+
+    <Button
+        android:id="@+id/btnGerarRelatorio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawablePadding="8dp"
+        android:text="Gerar Relatório PDF"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:padding="20dp"
+        android:gravity="center_horizontal">
+
+        <Button
+            android:id="@+id/txtBtnVoltar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Voltar"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"/>
+
+        <Button
+            android:id="@+id/txtBtnSair"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Sair"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"/>
+    </LinearLayout>
+
+</LinearLayout>
