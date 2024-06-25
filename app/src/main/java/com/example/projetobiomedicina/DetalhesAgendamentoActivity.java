@@ -11,34 +11,47 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
-public class DethalhesAgendamentoActivity extends AppCompatActivity {
+
+public class DetalhesAgendamentoActivity extends AppCompatActivity {
     TextView detalhesTextView;
-    EditText editTextNomeExame, editTextTipo, editTextDataRealizado, editTextIdCliente, editTextIdInfoReferencia;
-    EditText editTextDataHoraColeta, editTextNomeProfissional, editTextNumAmostras, editTextCondicoesColeta;
+    EditText editTextNomeExame, editTextTipo,editTextIdCliente, editTextIdInfoReferencia;
+    EditText editTextNomeProfissional, editTextNumAmostras, editTextCondicoesColeta;
     EditText editTextIdentificacaoTubos, editTextTempoArmazenamento, editTextCondicoesTransporte, editTextObservacoes;
     EditText editTextReacoesAdversas, editTextAcompanhamentoAdicional;
     Button buttonEnviar;
 
+    Calendar calendar = Calendar.getInstance();
+    Date dataHoraAtual = calendar.getTime();
+
+    SimpleDateFormat saveDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+    SimpleDateFormat exibirDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+
+    String dataHoraFormatada = saveDateFormat.format(dataHoraAtual);
+    String dataFormatada = exibirDateFormat.format(dataHoraAtual);
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_dethalhes_agendamento);
+        setContentView(R.layout.activity_detalhes_agendamento);
+
+
 
         detalhesTextView = findViewById(R.id.detalhesTextView);
         editTextNomeExame = findViewById(R.id.et_nome_exame);
         editTextTipo = findViewById(R.id.editTextTipo);
-        editTextDataRealizado = findViewById(R.id.et_dt_realizado);
         editTextIdCliente = findViewById(R.id.et_id_cliente);
         editTextIdInfoReferencia = findViewById(R.id.et_id_info_referencia);
-        editTextDataHoraColeta = findViewById(R.id.et_data_hora_coleta);
         editTextNomeProfissional = findViewById(R.id.et_nome_profissional);
         editTextNumAmostras = findViewById(R.id.et_num_amostras);
         editTextCondicoesColeta = findViewById(R.id.et_condicoes_coleta);
@@ -62,17 +75,21 @@ public class DethalhesAgendamentoActivity extends AppCompatActivity {
                     + "Número: " + agendamento.optString("numlograpac") + "\n"
                     + "Complemento: " + agendamento.optString("complpac") + "\n"
                     + "Bairro: " + agendamento.optString("bairropac") + "\n"
+                    + "Profissional: " + agendamento.optString("nome") + "\n"
+                    + "codProced: " + agendamento.optString("codProced") + "\n"
                     + "Procedimento: " + agendamento.optString("descProced");
             detalhesTextView.setText(detalhes);
 
             // Preencher campos de inserção com dados iniciais (se necessário)
             editTextIdCliente.setText(agendamento.optString("cpfpac"));
+            editTextNomeExame.setText(agendamento.optString("descProced"));
+            editTextNomeProfissional.setText(agendamento.optString("nome"));
+            editTextIdInfoReferencia.setText(agendamento.optString("codProced"));
 
         } catch (JSONException e) {
             e.printStackTrace();
             detalhesTextView.setText("Erro ao carregar os detalhes.");
         }
-
         buttonEnviar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -82,13 +99,28 @@ public class DethalhesAgendamentoActivity extends AppCompatActivity {
     }
 
     private void enviarDados() {
+        String mensagemRevisao = montarMensagemRevisao();
+        new AlertDialog.Builder(DetalhesAgendamentoActivity.this)
+                .setTitle("Revisar Dados")
+                .setMessage(mensagemRevisao)
+                .setPositiveButton("Salvar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Chamar o método para realmente enviar os dados
+                        realmenteEnviarDados();
+                    }
+                })
+                .setNegativeButton("Voltar", null)
+                .show();
+    }
+
+    private void realmenteEnviarDados() {
         String nomeExame = editTextNomeExame.getText().toString();
-        boolean tipo = Boolean.parseBoolean(editTextTipo.getText().toString());
-        String dataRealizado = editTextDataRealizado.getText().toString();
         long idCliente = Long.parseLong(editTextIdCliente.getText().toString());
         long idInfoReferencia = Long.parseLong(editTextIdInfoReferencia.getText().toString());
-        String dataHoraColeta = editTextDataHoraColeta.getText().toString();
         String nomeProfissional = editTextNomeProfissional.getText().toString();
+        boolean tipo = Boolean.parseBoolean(editTextTipo.getText().toString());
+        String dataHoraColeta = dataHoraFormatada;
         int numAmostras = Integer.parseInt(editTextNumAmostras.getText().toString());
         String condicoesColeta = editTextCondicoesColeta.getText().toString();
         String identificacaoTubos = editTextIdentificacaoTubos.getText().toString();
@@ -102,10 +134,9 @@ public class DethalhesAgendamentoActivity extends AppCompatActivity {
         try {
             jsonObject.put("nomeexame", nomeExame);
             jsonObject.put("tipo", tipo);
-            jsonObject.put("dtrealizado", dataRealizado);
             jsonObject.put("idcliente", idCliente);
             jsonObject.put("idinforeferencia", idInfoReferencia);
-            jsonObject.put("dataHoraColeta", dataHoraColeta);
+            jsonObject.put("dataHoraColeta", dataHoraFormatada);
             jsonObject.put("nomeProfissional", nomeProfissional);
             jsonObject.put("numAmostras", numAmostras);
             jsonObject.put("condicoesColeta", condicoesColeta);
@@ -125,7 +156,7 @@ public class DethalhesAgendamentoActivity extends AppCompatActivity {
         apiClient.postData("exameseamostras", jsonBody, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                runOnUiThread(() -> Toast.makeText(DethalhesAgendamentoActivity.this, "Falha ao enviar dados", Toast.LENGTH_SHORT).show());
+                runOnUiThread(() -> Toast.makeText(DetalhesAgendamentoActivity.this, "Falha ao enviar dados", Toast.LENGTH_SHORT).show());
             }
 
             @Override
@@ -134,25 +165,56 @@ public class DethalhesAgendamentoActivity extends AppCompatActivity {
                     if (response.isSuccessful()) {
                         mostrarPopup();
                     } else {
-                        Toast.makeText(DethalhesAgendamentoActivity.this, "Erro ao enviar dados", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(DetalhesAgendamentoActivity.this, "Erro ao enviar dados", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
         });
     }
 
+    private String montarMensagemRevisao() {
+        String nomeExame = editTextNomeExame.getText().toString();
+        boolean tipo = Boolean.parseBoolean(editTextTipo.getText().toString());
+        long idCliente = Long.parseLong(editTextIdCliente.getText().toString());
+        long idInfoReferencia = Long.parseLong(editTextIdInfoReferencia.getText().toString());
+        String dataHoraColeta = dataFormatada;
+        String nomeProfissional = editTextNomeProfissional.getText().toString();
+        int numAmostras = Integer.parseInt(editTextNumAmostras.getText().toString());
+        String condicoesColeta = editTextCondicoesColeta.getText().toString();
+        String identificacaoTubos = editTextIdentificacaoTubos.getText().toString();
+        String tempoArmazenamento = editTextTempoArmazenamento.getText().toString();
+        String condicoesTransporte = editTextCondicoesTransporte.getText().toString();
+        String observacoes = editTextObservacoes.getText().toString();
+        String reacoesAdversas = editTextReacoesAdversas.getText().toString();
+        String acompanhamentoAdicional = editTextAcompanhamentoAdicional.getText().toString();
+
+        return  "---------Dados Importantes----------\n\n"+
+                "Nome do Profissional: " + nomeProfissional + "\n" +
+                "ID Cliente: " + idCliente + "\n" +
+//                "ID Informação de Referência: " + idInfoReferencia + "\n" +
+                "Nome do Exame: " + nomeExame + "\n\n" +
+
+                "---------Dados Coletados----------\n\n"+
+                "Tipo: " + tipo + "\n" +
+                "Data e Hora da Coleta: " + dataHoraColeta + "\n" +
+                "Número de Amostras: " + numAmostras + "\n" +
+                "Condições da Coleta: " + condicoesColeta + "\n" +
+                "Identificação dos Tubos: " + identificacaoTubos + "\n" +
+                "Tempo de Armazenamento: " + tempoArmazenamento + "\n" +
+                "Condições de Transporte: " + condicoesTransporte + "\n" +
+                "Observações: " + observacoes + "\n" +
+                "Reações Adversas: " + reacoesAdversas + "\n" +
+                "Acompanhamento Adicional: " + acompanhamentoAdicional;
+    }
+
     private void mostrarPopup() {
-        new AlertDialog.Builder(DethalhesAgendamentoActivity.this)
-                .setTitle("Sucesso")
-                .setMessage("Visita médica realizada com sucesso")
+        new AlertDialog.Builder(DetalhesAgendamentoActivity.this)
+                .setTitle("Dados Enviados")
+                .setMessage("Os dados foram enviados com sucesso!")
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        // Voltar para a VisitaActivity
-                        Intent intent = new Intent(DethalhesAgendamentoActivity.this, VisitaActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        Intent intent = new Intent(DetalhesAgendamentoActivity.this, VisitaActivity.class);
                         startActivity(intent);
-                        finish();
                     }
                 })
                 .show();

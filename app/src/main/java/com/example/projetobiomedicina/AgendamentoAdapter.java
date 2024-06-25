@@ -43,9 +43,9 @@ public class AgendamentoAdapter extends RecyclerView.Adapter<AgendamentoAdapter.
                 + ", " + jsonObject.optString("complpac") + ", " + jsonObject.optString("bairropac")
                 + ", " + jsonObject.optString("ceppac");
         String procedimento = jsonObject.optString("descProced");
-        String login = jsonObject.optString("login");
+        String codProced = jsonObject.optString("codProced");
+        String nomeProfissional = jsonObject.optString("nome");
 
-//        holder.textViewLogin.setText("Login: " + login);
         holder.textViewCpf.setText("CPF: " + cpf);
         holder.textViewNome.setText("Nome: " + nome);
         holder.textViewDataConsulta.setText("Data: " + dataConsulta);
@@ -55,7 +55,7 @@ public class AgendamentoAdapter extends RecyclerView.Adapter<AgendamentoAdapter.
 
 
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(mContext, DethalhesAgendamentoActivity.class);
+            Intent intent = new Intent(mContext, DetalhesAgendamentoActivity.class);
             intent.putExtra("agendamento", jsonObject.toString());
             mContext.startActivity(intent);
         });

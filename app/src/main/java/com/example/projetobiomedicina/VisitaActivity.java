@@ -19,7 +19,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import okhttp3.Call;
@@ -97,15 +100,27 @@ public class VisitaActivity extends AppCompatActivity {
                     String responseData = response.body().string();
                     runOnUiThread(() -> {
                         try {
+
+                            SimpleDateFormat inputDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+                            SimpleDateFormat outputDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                             JSONArray jsonArray = new JSONArray(responseData);
                             for (int i = 0; i < jsonArray.length(); i++) {
+
+
+
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                                 JSONObject pacienteObject = jsonObject.getJSONObject("paciente");
                                 JSONObject procedimentoObject = jsonObject.getJSONObject("procedimentos");
+                                JSONObject userObject = jsonObject.getJSONObject("user");
                                 JSONObject agendamento = new JSONObject();
+
+                                String dataConsultaOriginal = jsonObject.getString("dataConsulta");
+                                Date date = inputDateFormat.parse(dataConsultaOriginal);
+                                String dataConsultaFormatada = outputDateFormat.format(date);
+
                                 agendamento.put("cpfpac", pacienteObject.getLong("cpfpac"));
                                 agendamento.put("nomepac", pacienteObject.getString("nomepac"));
-                                agendamento.put("dataConsulta", jsonObject.getString("dataConsulta"));
+                                agendamento.put("dataConsulta", dataConsultaFormatada);
                                 agendamento.put("telpac", pacienteObject.getLong("telpac"));
                                 agendamento.put("ceppac", pacienteObject.getLong("ceppac"));
                                 agendamento.put("lograpac", pacienteObject.getString("lograpac"));
@@ -113,11 +128,15 @@ public class VisitaActivity extends AppCompatActivity {
                                 agendamento.put("complpac", pacienteObject.getString("complpac"));
                                 agendamento.put("bairropac", pacienteObject.getString("bairropac"));
                                 agendamento.put("descProced", procedimentoObject.getString("descProced"));
+                                agendamento.put("codProced", procedimentoObject.getString("codProced"));
+                                agendamento.put("nome", userObject.getString("nome"));
                                 agendamentosList.add(agendamento);
                             }
                             agendamentoAdapter.notifyDataSetChanged();
                         } catch (JSONException e) {
                             e.printStackTrace();
+                        } catch (ParseException e) {
+                            throw new RuntimeException(e);
                         }
                     });
                 } else {

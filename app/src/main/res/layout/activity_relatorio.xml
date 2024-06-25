@@ -1,71 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    tools:context=".RelatorioActivity"
-
-    android:gravity="center">
+    >
 
     <EditText
-        android:id="@+id/campoBusca"
+        android:id="@+id/campoCpf"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Buscar Paciente Por CPF"
-        android:backgroundTint="@android:color/white"
-        android:textColor="@android:color/black"
-        android:layout_marginBottom="16dp"
+        android:layout_marginTop="50dp"
         android:padding="12dp"
-        android:inputType="textCapWords"
-        android:gravity="center"/>
-
+        android:hint="Digite o CPF"
+        android:background="@drawable/edit_text_background"
+        android:textColor="@android:color/black"
+        android:gravity="center_horizontal"
+        android:inputType="number"/>
 
     <Button
         android:id="@+id/btnBuscar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:drawablePadding="8dp"
-        android:text="Buscar"
-        android:textAllCaps="false"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"/>
+        android:layout_width="wrap_content"
+        android:layout_height="58dp"
+        android:layout_below="@id/campoCpf"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="170dp"
+        android:layout_toStartOf="@+id/btnLimpar"
 
+        android:text="Buscar"
+        android:textColor="@android:color/white" />
 
     <Button
-        android:id="@+id/btnGerarRelatorio"
+        android:id="@+id/btnLimpar"
+        android:layout_width="wrap_content"
+        android:layout_height="58dp"
+        android:layout_below="@id/campoCpf"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="5dp"
+
+        android:text="Limpar"
+        android:textColor="@android:color/white" />
+
+
+    <TextView
+        android:id="@+id/textInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:drawablePadding="8dp"
-        android:text="Gerar Relatório PDF"
-        android:textAllCaps="false"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"/>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true"
-        android:padding="20dp"
-        android:gravity="center_horizontal">
+        android:layout_below="@id/btnBuscar"
+        android:layout_marginTop="16dp"
+        android:padding="16dp"
+        android:textColor="@android:color/black"
 
-        <Button
-            android:id="@+id/txtBtnVoltar"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Voltar"
-            android:layout_weight="1"
-            android:layout_marginEnd="10dp"/>
+        android:text="Dados do Paciente"
+        android:textAlignment="center"
+        android:textStyle="bold"/>
+    <Button
+        android:id="@+id/btnPrint"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_below="@id/textInfo"
+        android:layout_marginTop="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:text="🖨️ Gerar PDF"
+        android:textSize="24sp"
+        android:layout_centerHorizontal="true"/>
 
-        <Button
-            android:id="@+id/txtBtnSair"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Sair"
-            android:layout_weight="1"
-            android:layout_marginStart="10dp"/>
-    </LinearLayout>
-
-</LinearLayout>
+</RelativeLayout>

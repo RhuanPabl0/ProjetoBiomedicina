@@ -16,7 +16,10 @@
         android:theme="@style/Theme.ProjetoBiomedicina"
         tools:targetApi="31">
         <activity
-            android:name=".DethalhesAgendamentoActivity"
+            android:name=".ColetaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DetalhesAgendamentoActivity"
             android:exported="false" />
         <activity
             android:name=".RelatorioActivity"

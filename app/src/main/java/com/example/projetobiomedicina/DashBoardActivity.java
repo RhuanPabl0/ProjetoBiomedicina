@@ -26,7 +26,7 @@ public class DashBoardActivity extends AppCompatActivity {
 
 
     private static final String TAG = "DashBoardActivity";
-    Button btnVisita, btnRelatorio;
+    Button btnVisita, btnRelatorio,btnColeta;
     Button btnSair, btnVoltar;
 
     @Override
@@ -38,6 +38,7 @@ public class DashBoardActivity extends AppCompatActivity {
         btnVoltar = findViewById(R.id.txtBtnVoltar);
         btnVisita = findViewById(R.id.visitaAgendada); // Botão para navegar para VisitaActivity
         btnRelatorio = findViewById(R.id.relatorio);
+        btnColeta = findViewById(R.id.listaColetada);
 
         btnSair.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,6 +74,15 @@ public class DashBoardActivity extends AppCompatActivity {
                 startActivity(visitaIntent);
             }
         });
+
+        btnColeta.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent coletaIntent = new Intent(DashBoardActivity.this, ColetaActivity.class);
+                startActivity(coletaIntent);
+            }
+        });
+
 
         // Recuperar as credenciais do usuário
         String login = getUserLogin();
@@ -116,7 +126,7 @@ public class DashBoardActivity extends AppCompatActivity {
                             TextView txtViewCons = findViewById(R.id.consTextView);
 
                             txtViewNome.setText(nome);
-                            txtViewCons.setText(cons);
+                            txtViewCons.setText( "CRM: " +cons);
 
                             // Salvar detalhes do usuário no SharedPreferences
                             saveUserDetails(nome, cons);
