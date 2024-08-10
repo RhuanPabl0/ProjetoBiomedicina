@@ -67,4 +67,21 @@ public class ApiClient {
 
         client.newCall(request).enqueue(callback);
     }
+    public void updateVisita(long idAgenda, String visita, Callback callback) {
+        String url = BASE_URL + "agenda/" + idAgenda + "/visita?visita=" + visita;
+        Request request = new Request.Builder()
+                .url(url)
+                .put(RequestBody.create(null, new byte[0])) // Corpo vazio para a requisição PUT
+                .build();
+
+        client.newCall(request).enqueue(callback);
+    }
+    public void getAgendamentosPorLoginData(String login, Callback callback) {
+        String url = BASE_URL + "agenda/byLoginVisitaData?login=" + login;
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        client.newCall(request).enqueue(callback);
+    }
 }

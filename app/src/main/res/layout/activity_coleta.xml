@@ -11,7 +11,7 @@
         android:id="@+id/buttonGetData"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Get Data"
+        android:text="Listar Exames e Amostras"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"/>
 

@@ -14,7 +14,12 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -41,6 +46,7 @@ public class ColetaActivity extends AppCompatActivity {
             }
         });
     }
+
     private void fetchData() {
         apiClient.getData("exameseamostras", new Callback() {
             @Override
@@ -53,6 +59,7 @@ public class ColetaActivity extends AppCompatActivity {
                 });
                 Log.e("ColetaActivity", "Error fetching data", e);
             }
+
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (response.isSuccessful() && response.body() != null) {
@@ -79,16 +86,36 @@ public class ColetaActivity extends AppCompatActivity {
             }
         });
     }
+
     private String formatData(List<ExameAmostra> dataList) {
         StringBuilder formattedData = new StringBuilder();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+        SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+
         for (ExameAmostra item : dataList) {
+            Date date = null;
+            String dataHoraColeta = item.getDataHoraColeta();
+            if (dataHoraColeta != null) {
+                try {
+                    date = sdf.parse(dataHoraColeta);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (date != null) {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(date);
+                calendar.add(Calendar.HOUR_OF_DAY, -4); // Ajusta para GMT-4
+                date = calendar.getTime();
+            }
+
             formattedData.append("ID: ").append(item.getId()).append("\n")
                     .append("Nome do Exame: ").append(item.getNomeexame()).append("\n")
-                    .append("Tipo: ").append(item.isTipo() ? "Tipo 1" : "Tipo 2").append("\n")
-                    .append("Data Realizado: ").append(item.getDtrealizado()).append("\n")
+                    .append("Tipo: ").append(item.isTipo() ? "Exame" : "Amostra").append("\n")
                     .append("ID Cliente: ").append(item.getIdcliente()).append("\n")
                     .append("ID Informação Referência: ").append(item.getIdinforeferencia()).append("\n")
-                    .append("Data e Hora da Coleta: ").append(item.getDataHoraColeta()).append("\n")
+                    .append("Data e Hora da Coleta: ").append(date != null ? outputFormat.format(date) : "Data inválida").append("\n")
                     .append("Nome do Profissional: ").append(item.getNomeProfissional()).append("\n")
                     .append("Número de Amostras: ").append(item.getNumAmostras()).append("\n")
                     .append("Condições de Coleta: ").append(item.getCondicoesColeta()).append("\n")

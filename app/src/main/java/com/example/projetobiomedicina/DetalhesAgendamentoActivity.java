@@ -20,17 +20,18 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-
+import java.util.TimeZone;
 
 public class DetalhesAgendamentoActivity extends AppCompatActivity {
     TextView detalhesTextView;
-    EditText editTextNomeExame, editTextTipo,editTextIdCliente, editTextIdInfoReferencia;
+    EditText editTextNomeExame, editTextTipo, editTextIdCliente, editTextIdInfoReferencia;
     EditText editTextNomeProfissional, editTextNumAmostras, editTextCondicoesColeta;
     EditText editTextIdentificacaoTubos, editTextTempoArmazenamento, editTextCondicoesTransporte, editTextObservacoes;
     EditText editTextReacoesAdversas, editTextAcompanhamentoAdicional;
     Button buttonEnviar;
 
-    Calendar calendar = Calendar.getInstance();
+    TimeZone timeZone = TimeZone.getTimeZone("America/Cuiaba");
+    Calendar calendar = Calendar.getInstance(timeZone);
     Date dataHoraAtual = calendar.getTime();
 
     SimpleDateFormat saveDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
@@ -39,13 +40,12 @@ public class DetalhesAgendamentoActivity extends AppCompatActivity {
     String dataHoraFormatada = saveDateFormat.format(dataHoraAtual);
     String dataFormatada = exibirDateFormat.format(dataHoraAtual);
 
+    private long idAgenda;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detalhes_agendamento);
-
-
 
         detalhesTextView = findViewById(R.id.detalhesTextView);
         editTextNomeExame = findViewById(R.id.et_nome_exame);
@@ -76,7 +76,7 @@ public class DetalhesAgendamentoActivity extends AppCompatActivity {
                     + "Complemento: " + agendamento.optString("complpac") + "\n"
                     + "Bairro: " + agendamento.optString("bairropac") + "\n"
                     + "Profissional: " + agendamento.optString("nome") + "\n"
-                    + "codProced: " + agendamento.optString("codProced") + "\n"
+//                    + "codProced: " + agendamento.optString("codProced") + "\n"
                     + "Procedimento: " + agendamento.optString("descProced");
             detalhesTextView.setText(detalhes);
 
@@ -85,6 +85,9 @@ public class DetalhesAgendamentoActivity extends AppCompatActivity {
             editTextNomeExame.setText(agendamento.optString("descProced"));
             editTextNomeProfissional.setText(agendamento.optString("nome"));
             editTextIdInfoReferencia.setText(agendamento.optString("codProced"));
+
+            // Armazenar idAgenda para a atualização de visita
+            idAgenda = agendamento.optLong("idAgenda");
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -156,16 +159,53 @@ public class DetalhesAgendamentoActivity extends AppCompatActivity {
         apiClient.postData("exameseamostras", jsonBody, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                runOnUiThread(() -> Toast.makeText(DetalhesAgendamentoActivity.this, "Falha ao enviar dados", Toast.LENGTH_SHORT).show());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(DetalhesAgendamentoActivity.this, "Erro ao enviar dados", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                runOnUiThread(() -> {
-                    if (response.isSuccessful()) {
-                        mostrarPopup();
-                    } else {
-                        Toast.makeText(DetalhesAgendamentoActivity.this, "Erro ao enviar dados", Toast.LENGTH_SHORT).show();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateVisitaStatus();
+                        Toast.makeText(DetalhesAgendamentoActivity.this, "Dados enviados com sucesso!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+    }
+
+    private void updateVisitaStatus() {
+        ApiClient apiClient = new ApiClient();
+        apiClient.updateVisita(idAgenda, "nao", new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(DetalhesAgendamentoActivity.this, "Erro ao atualizar visita", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (response.isSuccessful()) {
+                            Toast.makeText(DetalhesAgendamentoActivity.this, "Visita atualizada com sucesso!", Toast.LENGTH_SHORT).show();
+
+                            Intent VisitaIntent = new Intent(DetalhesAgendamentoActivity.this, VisitaActivity.class);
+                            startActivity(VisitaIntent);
+                        } else {
+                            Toast.makeText(DetalhesAgendamentoActivity.this, "Erro ao atualizar visita", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
             }
@@ -173,50 +213,21 @@ public class DetalhesAgendamentoActivity extends AppCompatActivity {
     }
 
     private String montarMensagemRevisao() {
-        String nomeExame = editTextNomeExame.getText().toString();
-        boolean tipo = Boolean.parseBoolean(editTextTipo.getText().toString());
-        long idCliente = Long.parseLong(editTextIdCliente.getText().toString());
-        long idInfoReferencia = Long.parseLong(editTextIdInfoReferencia.getText().toString());
-        String dataHoraColeta = dataFormatada;
-        String nomeProfissional = editTextNomeProfissional.getText().toString();
-        int numAmostras = Integer.parseInt(editTextNumAmostras.getText().toString());
-        String condicoesColeta = editTextCondicoesColeta.getText().toString();
-        String identificacaoTubos = editTextIdentificacaoTubos.getText().toString();
-        String tempoArmazenamento = editTextTempoArmazenamento.getText().toString();
-        String condicoesTransporte = editTextCondicoesTransporte.getText().toString();
-        String observacoes = editTextObservacoes.getText().toString();
-        String reacoesAdversas = editTextReacoesAdversas.getText().toString();
-        String acompanhamentoAdicional = editTextAcompanhamentoAdicional.getText().toString();
-
-        return  "---------Dados Importantes----------\n\n"+
-                "Nome do Profissional: " + nomeProfissional + "\n" +
-                "ID Cliente: " + idCliente + "\n" +
-//                "ID Informação de Referência: " + idInfoReferencia + "\n" +
-                "Nome do Exame: " + nomeExame + "\n\n" +
-
-                "---------Dados Coletados----------\n\n"+
-                "Tipo: " + tipo + "\n" +
-                "Data e Hora da Coleta: " + dataHoraColeta + "\n" +
-                "Número de Amostras: " + numAmostras + "\n" +
-                "Condições da Coleta: " + condicoesColeta + "\n" +
-                "Identificação dos Tubos: " + identificacaoTubos + "\n" +
-                "Tempo de Armazenamento: " + tempoArmazenamento + "\n" +
-                "Condições de Transporte: " + condicoesTransporte + "\n" +
-                "Observações: " + observacoes + "\n" +
-                "Reações Adversas: " + reacoesAdversas + "\n" +
-                "Acompanhamento Adicional: " + acompanhamentoAdicional;
-    }
-
-    private void mostrarPopup() {
-        new AlertDialog.Builder(DetalhesAgendamentoActivity.this)
-                .setTitle("Dados Enviados")
-                .setMessage("Os dados foram enviados com sucesso!")
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(DetalhesAgendamentoActivity.this, VisitaActivity.class);
-                        startActivity(intent);
-                    }
-                })
-                .show();
+        StringBuilder mensagem = new StringBuilder();
+        mensagem.append("Nome do Exame: ").append(editTextNomeExame.getText().toString()).append("\n");
+        mensagem.append("Tipo: ").append(editTextTipo.getText().toString()).append("\n");
+        mensagem.append("ID Cliente: ").append(editTextIdCliente.getText().toString()).append("\n");
+//        mensagem.append("ID Info Referência: ").append(editTextIdInfoReferencia.getText().toString()).append("\n");
+        mensagem.append("Nome do Profissional: ").append(editTextNomeProfissional.getText().toString()).append("\n");
+        mensagem.append("Data e Hora da Coleta: ").append(dataFormatada).append("\n");
+        mensagem.append("Número de Amostras: ").append(editTextNumAmostras.getText().toString()).append("\n");
+        mensagem.append("Condições de Coleta: ").append(editTextCondicoesColeta.getText().toString()).append("\n");
+        mensagem.append("Identificação dos Tubos: ").append(editTextIdentificacaoTubos.getText().toString()).append("\n");
+        mensagem.append("Tempo de Armazenamento: ").append(editTextTempoArmazenamento.getText().toString()).append("\n");
+        mensagem.append("Condições de Transporte: ").append(editTextCondicoesTransporte.getText().toString()).append("\n");
+        mensagem.append("Observações: ").append(editTextObservacoes.getText().toString()).append("\n");
+        mensagem.append("Reações Adversas: ").append(editTextReacoesAdversas.getText().toString()).append("\n");
+        mensagem.append("Acompanhamento Adicional: ").append(editTextAcompanhamentoAdicional.getText().toString());
+        return mensagem.toString();
     }
 }

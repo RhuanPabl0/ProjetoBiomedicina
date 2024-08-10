@@ -5,60 +5,74 @@
     android:layout_height="match_parent"
     tools:context=".VisitaActivity">
 
+    <!-- LinearLayout with professional info, fixed at the top -->
     <LinearLayout
         android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/rounded_background"
         android:orientation="vertical"
-        android:padding="10dp">
+        android:padding="10dp"
+        android:layout_marginTop="20dp"
+        android:layout_alignParentTop="true">
+
         <TextView
             android:id="@+id/nomeTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:text="Nome: "
             android:textColor="@color/white"
             android:textSize="20sp" />
+
         <TextView
             android:id="@+id/loginTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/nomeTextView"
-            android:layout_centerHorizontal="true"
             android:layout_marginTop="20dp"
             android:text="Codigo:"
             android:textColor="@color/white"
             android:textSize="20sp" />
+
         <TextView
             android:id="@+id/consTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/nomeTextView"
-            android:layout_centerHorizontal="true"
             android:layout_marginTop="20dp"
             android:text="CRM: "
             android:textColor="@color/white"
             android:textSize="20sp" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/textdtn"
+    <!-- Scrollable content -->
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:text="Agendamentos"
-        android:textSize="24dp"
-        android:layout_below="@id/linearLayout2"/>
+        android:layout_height="match_parent"
+        android:layout_below="@id/linearLayout2"
+        android:layout_above="@+id/linearLayout">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewAgendamentos"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/textdtn"
-        android:layout_marginTop="20dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp">
 
+            <TextView
+                android:id="@+id/textdtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="Agendamentos"
+                android:textSize="24dp" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewAgendamentos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Fixed buttons at the bottom -->
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"

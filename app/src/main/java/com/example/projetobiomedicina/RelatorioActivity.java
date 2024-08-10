@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.pdf.PdfDocument;
 import android.os.AsyncTask;
@@ -22,66 +21,58 @@ import android.print.PrintManager;
 import android.print.pdf.PrintedPdfDocument;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class RelatorioActivity extends AppCompatActivity {
 
-    private EditText campoCpf;
+    private EditText campoLogin;
     private Button btnBuscar;
     private Button btnLimpar;
     private Button btnPrint;
     private TextView textInfo;
+    private List<JSONObject> dadosExames;
+
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_relatorio);
+        setContentView(R.layout.activity_relatorio); // Certifique-se de que o layout correto está sendo carregado
 
-        campoCpf = findViewById(R.id.campoCpf);
+        campoLogin = findViewById(R.id.campoLogin);
         btnBuscar = findViewById(R.id.btnBuscar);
         btnLimpar = findViewById(R.id.btnLimpar);
         textInfo = findViewById(R.id.textInfo);
         btnPrint = findViewById(R.id.btnPrint);
 
-
-        // Adiciona um TextWatcher para limitar o campo de CPF a 11 dígitos
-        campoCpf.addTextChangedListener(new TextWatcher() {
+        campoLogin.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                String cpf = s.toString();
-                if (cpf.length() > 11) {
-                    campoCpf.setText(cpf.substring(0, 11));
-                    campoCpf.setSelection(11);
-                }
             }
 
             @Override
@@ -93,49 +84,41 @@ public class RelatorioActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 textInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
-                String cpf = campoCpf.getText().toString();
-                if (!isValidCpf(cpf)) {
-                    Toast.makeText(RelatorioActivity.this, "CPF inválido", Toast.LENGTH_SHORT).show();
-                } else {
-                    new BuscarCpfTask().execute(cpf);
-                }
+                String login = campoLogin.getText().toString();
+                new BuscarExameTask().execute(login);
             }
         });
 
         btnLimpar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                campoCpf.setText("");
+                campoLogin.setText("");
                 textInfo.setText("");
                 textInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
-                btnPrint.setEnabled(false); // Desabilita o botão de impressão
+                btnPrint.setEnabled(false);
             }
         });
 
         btnPrint.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (textInfo.getText().toString().isEmpty()) {
-                    Toast.makeText(RelatorioActivity.this, "Nenhum paciente buscado para gerar o PDF", Toast.LENGTH_SHORT).show();
+                if (dadosExames == null || dadosExames.isEmpty()) {
+                    Toast.makeText(RelatorioActivity.this, "Nenhum exame buscado para gerar o PDF", Toast.LENGTH_SHORT).show();
                 } else {
                     createPdf();
                 }
             }
         });
 
-        // Desabilita o botão de impressão inicialmente
         btnPrint.setEnabled(false);
     }
 
-    private boolean isValidCpf(String cpf) {
-        return cpf.length() == 11;
-    }
-
-    private class BuscarCpfTask extends AsyncTask<String, Void, String> {
+    private class BuscarExameTask extends AsyncTask<String, Void, List<JSONObject>> {
         @Override
-        protected String doInBackground(String... strings) {
-            String cpf = strings[0];
-            String apiUrl = "http://192.168.0.40:8080/paciente/" + cpf;
+        protected List<JSONObject> doInBackground(String... strings) {
+            String login = strings[0];
+            String apiUrl = "http://192.168.0.40:8080/resultadoexame/byUserLogin/" + login;
+            List<JSONObject> dadosExames = new ArrayList<>();
 
             try {
                 URL url = new URL(apiUrl);
@@ -155,86 +138,79 @@ public class RelatorioActivity extends AppCompatActivity {
                     }
                     br.close();
 
-                    JSONObject jsonObject = new JSONObject(response.toString());
-                    return jsonObject.toString();
+                    JSONArray jsonArray = new JSONArray(response.toString());
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        dadosExames.add(jsonObject);
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return null;
+            return dadosExames;
         }
 
         @Override
-        protected void onPostExecute(String result) {
-            if (result != null) {
-                try {
-                    JSONObject jsonObject = new JSONObject(result);
-                    String nome = jsonObject.getString("nomepac");
-                    String cpf = jsonObject.getString("cpfpac");
-                    String telefone = jsonObject.getString("telpac");
-                    String cep = jsonObject.getString("ceppac");
-                    String endereco = jsonObject.getString("lograpac") + ", " + jsonObject.getString("numlograpac") + " - " + jsonObject.getString("complpac");
-                    String bairro = jsonObject.getString("bairropac");
-                    String cidade = jsonObject.getString("cidadepac");
-                    String uf = jsonObject.getString("ufpac");
-                    String rg = jsonObject.getString("rgpac");
-                    String estadoRg = jsonObject.getString("estrgpac");
-                    String nomeMae = jsonObject.getString("nomemaepac");
-                    String dtNasc = jsonObject.getString("dtnascpac");
+        protected void onPostExecute(List<JSONObject> result) {
+            if (result != null && !result.isEmpty()) {
+                dadosExames = result;
 
-                    String info = "Nome: " + nome + "\n" +
-                            "CPF: " + cpf + "\n" +
-                            "Telefone: " + telefone + "\n" +
-                            "CEP: " + cep + "\n" +
-                            "Endereço: " + endereco + "\n" +
-                            "Bairro: " + bairro + "\n" +
-                            "Cidade: " + cidade + "\n" +
-                            "UF: " + uf + "\n" +
-                            "RG: " + rg + "\n" +
-                            "Estado do RG: " + estadoRg + "\n" +
-                            "Nome da Mãe: " + nomeMae + "\n" +
-                            "Data de Nascimento: " + dtNasc;
-                    textInfo.setText(info);
+                StringBuilder displayText = new StringBuilder();
+                for (JSONObject jsonObject : result) {
+                    try {
+                        JSONObject paciente = jsonObject.getJSONObject("paciente");
+                        String nome = paciente.getString("nomepac");
+                        String cpf = paciente.getString("cpfpac");
 
-                    Drawable icon = getResources().getDrawable(R.drawable.ic_check_green);
-                    icon.setBounds(0, 0, icon.getIntrinsicWidth(), icon.getIntrinsicHeight());
-                    textInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, icon, null);
-                    textInfo.setCompoundDrawablePadding(8);
-
-                    // Habilita o botão de impressão quando os dados do paciente são buscados
-                    btnPrint.setEnabled(true);
-
-                    // Exibe mensagem de sucesso
-                    Toast.makeText(RelatorioActivity.this, "Paciente encontrado com sucesso!", Toast.LENGTH_SHORT).show();
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                        displayText.append("Nome: ").append(nome).append("\n")
+                                .append("CPF: ").append(cpf).append("\n\n");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
+                textInfo.setText(displayText.toString());
+
+                Drawable icon = getResources().getDrawable(R.drawable.ic_check_green);
+                icon.setBounds(0, 0, icon.getIntrinsicWidth(), icon.getIntrinsicHeight());
+                textInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, icon, null);
+                textInfo.setCompoundDrawablePadding(8);
+
+                btnPrint.setEnabled(true);
+                Toast.makeText(RelatorioActivity.this, "Exame(s) encontrado(s) com sucesso!", Toast.LENGTH_SHORT).show();
             } else {
-                // Exibe mensagem de erro
-                Toast.makeText(RelatorioActivity.this, "Paciente não encontrado!", Toast.LENGTH_SHORT).show();
-                // Desabilita o botão de impressão quando nenhum paciente é encontrado
+                Toast.makeText(RelatorioActivity.this, "Exame(s) não encontrado(s)!", Toast.LENGTH_SHORT).show();
                 btnPrint.setEnabled(false);
             }
         }
     }
 
     private void createPdf() {
-        PrintManager printManager = (PrintManager) this.getSystemService(Context.PRINT_SERVICE);
-        String jobName = getString(R.string.app_name) + " Document";
-        printManager.print(jobName, new MyPrintDocumentAdapter(this, textInfo.getText().toString()), null);
+        if (dadosExames == null || dadosExames.isEmpty()) {
+            Toast.makeText(this, "Nenhum exame buscado para gerar o PDF", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        PdfDocument pdfDocument = new PdfDocument();
+        PrintManager printManager = (PrintManager) getSystemService(Context.PRINT_SERVICE);
+        String jobName = getString(R.string.app_name) + " Report";
+
+        printManager.print(jobName, new MyPrintDocumentAdapter(this, pdfDocument, dadosExames), null);
     }
 
     public class MyPrintDocumentAdapter extends PrintDocumentAdapter {
-        private Context context;
-        private String content;
-        private int pageHeight;
-        private int pageWidth;
-        public PdfDocument pdfDocument;
 
-        public MyPrintDocumentAdapter(Context context, String content) {
+        private Context context;
+        private List<JSONObject> dadosExames;
+        private PdfDocument pdfDocument;
+        private int pageWidth;
+        private int pageHeight;
+        private int totalPages;
+
+        public MyPrintDocumentAdapter(Context context, PdfDocument pdfDocument, List<JSONObject> dadosExames) {
             this.context = context;
-            this.content = content;
+            this.pdfDocument = pdfDocument;
+            this.dadosExames = dadosExames;
+            this.totalPages = dadosExames.size();
         }
 
         @Override
@@ -248,77 +224,145 @@ public class RelatorioActivity extends AppCompatActivity {
                 return;
             }
 
-            if (pdfDocument.getPages().size() > 0) {
-                callback.onLayoutFinished(new PrintDocumentInfo.Builder("document")
-                        .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
-                        .setPageCount(pdfDocument.getPages().size())
-                        .build(), true);
-            } else {
-                callback.onLayoutFinished(new PrintDocumentInfo.Builder("document")
-                        .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
-                        .setPageCount(1)
-                        .build(), true);
-            }
+            PrintDocumentInfo.Builder builder = new PrintDocumentInfo.Builder("Resultado")
+                    .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
+                    .setPageCount(totalPages);
+
+            PrintDocumentInfo info = builder.build();
+            callback.onLayoutFinished(info, true);
         }
 
         @Override
         public void onWrite(PageRange[] pages, ParcelFileDescriptor destination, CancellationSignal cancellationSignal, WriteResultCallback callback) {
-            PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(pageWidth, pageHeight, 1).create();
-            PdfDocument.Page page = pdfDocument.startPage(pageInfo);
-
             if (cancellationSignal.isCanceled()) {
                 callback.onWriteCancelled();
-                pdfDocument.close();
-                pdfDocument = null;
                 return;
             }
 
-            Canvas canvas = page.getCanvas();
-            Paint paint = new Paint();
-            paint.setColor(Color.BLACK);
-            paint.setTextSize(12);
+            for (int i = 0; i < totalPages; i++) {
+                if (cancellationSignal.isCanceled()) {
+                    callback.onWriteCancelled();
+                    return;
+                }
 
-            int x = 10, y = 25;
+                PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(pageWidth, pageHeight, i + 1).create();
+                PdfDocument.Page page = pdfDocument.startPage(pageInfo);
 
-            // Carrega a imagem dos recursos
-            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.fasipe);
-            // Redimensiona a imagem
-            int newWidth = 100;  // Defina a nova largura
-            int newHeight = (bitmap.getHeight() * newWidth) / bitmap.getWidth();  // Mantém a proporção
-            Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
+                if (page == null) {
+                    callback.onWriteFailed("Failed to start page " + i);
+                    return;
+                }
 
-            // Desenha a imagem no canto superior esquerdo
-            canvas.drawBitmap(scaledBitmap, x, y, null);
-
-            // Ajusta a posição inicial do texto
-            y += newHeight + 20;
-
-            // Desenha borda ao redor do texto
-            int borderPadding = 10;
-            Rect border = new Rect(x - borderPadding, y - newHeight - 20 - borderPadding, pageWidth - x + borderPadding, pageHeight - y + borderPadding);
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(2);
-            canvas.drawRect(border, paint);
-            paint.setStyle(Paint.Style.FILL);
-
-            // Desenha o texto da ficha
-            for (String line : content.split("\n")) {
-                canvas.drawText(line, x, y, paint);
-                y += paint.descent() - paint.ascent();
+                drawPage(page, i);
+                pdfDocument.finishPage(page);
             }
-
-            pdfDocument.finishPage(page);
 
             try {
                 pdfDocument.writeTo(new FileOutputStream(destination.getFileDescriptor()));
+                callback.onWriteFinished(pages);
             } catch (IOException e) {
                 callback.onWriteFailed(e.toString());
-                return;
             } finally {
                 pdfDocument.close();
-                pdfDocument = null;
             }
-            callback.onWriteFinished(new PageRange[]{new PageRange(0, 0)});
+        }
+
+        private void drawPage(PdfDocument.Page page, int pageNumber) {
+            Canvas canvas = page.getCanvas();
+            Paint paint = new Paint();
+            paint.setColor(Color.BLACK);
+            paint.setTextSize(14); // Aumentar o tamanho da fonte para melhor legibilidade
+
+            int x = 10;
+            int y = 25;
+
+            // Desenha o logotipo no topo
+            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.fasipe);
+            int imageWidth = pageWidth / 3;
+            int imageHeight = (bitmap.getHeight() * imageWidth) / bitmap.getWidth();
+            Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, imageWidth, imageHeight, true);
+
+            int imageX = (pageWidth - imageWidth) / 2;
+            canvas.drawBitmap(scaledBitmap, imageX, y, null);
+            y += imageHeight + 40; // Aumentar o espaçamento após o logotipo
+
+            // Desenha o conteúdo do exame atual
+            try {
+                JSONObject exame = dadosExames.get(pageNumber);
+
+                JSONObject paciente = exame.getJSONObject("paciente");
+                JSONObject procedimentos = exame.getJSONObject("procedimentos");
+                JSONObject user = exame.getJSONObject("user");
+                JSONObject infoReferencia = exame.getJSONObject("infoReferencia");
+
+                String dataResultadoFormatada = formatarData(exame.getString("dtresultado"));
+
+
+                String[] lines = {
+                        "Nome: " + paciente.getString("nomepac"),
+                        "CPF: " + paciente.getString("cpfpac"),
+                        "Código do Paciente: " + paciente.getInt("codpac"),
+                        "Telefone: " + paciente.getString("telpac"),
+                        "CEP: " + paciente.getString("ceppac"),
+                        "Endereço: " + paciente.getString("lograpac") + ", " + paciente.getString("numlograpac") + ", " + paciente.getString("complpac") + ", " + paciente.getString("bairropac") + ", " + paciente.getString("cidadepac") + " - " + paciente.getString("ufpac"),
+                        "RG: " + paciente.getString("rgpac"),
+                        "Estado do RG: " + paciente.getString("estrgpac"),
+                        "Nome da Mãe: " + paciente.getString("nomemaepac"),
+                        "Data de Nascimento: " + formatarData(paciente.getString("dtnascpac")), // Formata a data de nascimento
+                        "Código do Procedimento: " + procedimentos.getString("codProced"),
+                        "Descrição do Procedimento: " + procedimentos.getString("descProced"),
+                        "Valor do Procedimento: " + procedimentos.getDouble("valProced"),
+                        "Médico: " + user.getString("nome"),
+                        "Login do Médico: " + user.getString("login"),
+                        "Referência Mínima: " + infoReferencia.getDouble("referenciamin"),
+                        "Referência Máxima: " + infoReferencia.getDouble("referenciamax"),
+                        "Medida: " + infoReferencia.getString("medida"),
+                        "Resultado: " + exame.getInt("valor"),
+                        "Unidade de Medida: " + exame.getString("medida"),
+                        "Observação: " + exame.getString("observacao"),
+                        "Link do Resultado: " + exame.getString("linkresultado"),
+                        "Data do Resultado: " + formatardatahora(exame.getString("dtresultado"))
+                };
+
+                for (String line : lines) {
+                    canvas.drawText(line, x, y, paint);
+                    y += paint.descent() - paint.ascent() + 10; // Aumentar o espaçamento entre as linhas
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static String formatarData(String data) {
+        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+        try {
+            java.util.Date date = inputFormat.parse(data);
+            SimpleDateFormat outputDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
+            String formattedDate = outputDateFormat.format(date);
+
+            return formattedDate;
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return data; // Retorna a data original em caso de erro
+        }
+
+    }
+
+    private static String formatardatahora(String data) {
+        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+        try {
+            java.util.Date date = inputFormat.parse(data);
+            SimpleDateFormat outputDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+
+            String formattedDate = outputDateFormat.format(date);
+
+            return formattedDate;
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return data; // Retorna a data original em caso de erro
         }
     }
 }

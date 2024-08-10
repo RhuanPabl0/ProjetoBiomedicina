@@ -45,6 +45,7 @@ public class AgendamentoAdapter extends RecyclerView.Adapter<AgendamentoAdapter.
         String procedimento = jsonObject.optString("descProced");
         String codProced = jsonObject.optString("codProced");
         String nomeProfissional = jsonObject.optString("nome");
+        String idAgenda = jsonObject.optString("idAgenda");
 
         holder.textViewCpf.setText("CPF: " + cpf);
         holder.textViewNome.setText("Nome: " + nome);

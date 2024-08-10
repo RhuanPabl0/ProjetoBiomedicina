@@ -82,12 +82,24 @@ public class VisitaActivity extends AppCompatActivity {
         agendamentoAdapter = new AgendamentoAdapter(this, agendamentosList);
         recyclerViewAgendamentos.setAdapter(agendamentoAdapter);
 
+        // Inicialmente limpar a lista para evitar duplicações
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        atualizarAgendamentos();
+    }
+
+    private void atualizarAgendamentos() {
+        agendamentosList.clear();
         buscarAgendamentos(login);
     }
 
     private void buscarAgendamentos(String login) {
         ApiClient apiClient = new ApiClient();
-        apiClient.getData("agenda/byLoginAndVisita?login=" + login + "&visita=sim", new Callback() {
+        apiClient.getAgendamentosPorLoginData(login, new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 e.printStackTrace();
@@ -100,24 +112,23 @@ public class VisitaActivity extends AppCompatActivity {
                     String responseData = response.body().string();
                     runOnUiThread(() -> {
                         try {
-
                             SimpleDateFormat inputDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
                             SimpleDateFormat outputDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
                             JSONArray jsonArray = new JSONArray(responseData);
                             for (int i = 0; i < jsonArray.length(); i++) {
-
-
-
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                                 JSONObject pacienteObject = jsonObject.getJSONObject("paciente");
-                                JSONObject procedimentoObject = jsonObject.getJSONObject("procedimentos");
+                                JSONObject procedimentoObject = jsonObject.optJSONObject("procedimentos");
                                 JSONObject userObject = jsonObject.getJSONObject("user");
                                 JSONObject agendamento = new JSONObject();
 
                                 String dataConsultaOriginal = jsonObject.getString("dataConsulta");
+                                String idAgenda = jsonObject.getString("id");
+
                                 Date date = inputDateFormat.parse(dataConsultaOriginal);
                                 String dataConsultaFormatada = outputDateFormat.format(date);
 
+                                agendamento.put("idAgenda", idAgenda);
                                 agendamento.put("cpfpac", pacienteObject.getLong("cpfpac"));
                                 agendamento.put("nomepac", pacienteObject.getString("nomepac"));
                                 agendamento.put("dataConsulta", dataConsultaFormatada);
@@ -127,8 +138,16 @@ public class VisitaActivity extends AppCompatActivity {
                                 agendamento.put("numlograpac", pacienteObject.getInt("numlograpac"));
                                 agendamento.put("complpac", pacienteObject.getString("complpac"));
                                 agendamento.put("bairropac", pacienteObject.getString("bairropac"));
-                                agendamento.put("descProced", procedimentoObject.getString("descProced"));
-                                agendamento.put("codProced", procedimentoObject.getString("codProced"));
+
+                                // Adiciona informações do procedimento, se existir
+                                if (procedimentoObject != null) {
+                                    agendamento.put("descProced", procedimentoObject.getString("descProced"));
+                                    agendamento.put("codProced", procedimentoObject.getString("codProced"));
+                                } else {
+                                    agendamento.put("descProced", "");
+                                    agendamento.put("codProced", "");
+                                }
+
                                 agendamento.put("nome", userObject.getString("nome"));
                                 agendamentosList.add(agendamento);
                             }
