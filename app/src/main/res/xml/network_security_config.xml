@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">192.168.0.40</domain> <!-- Substitua pelo domínio da sua API -->
-<!--  IP: Rhuan       192.168.0.40-->
-<!--  IP CELULAR RENAN: 192.168.224.67 -->
+        <domain includeSubdomains="true">seu ip</domain> <!-- Substitua pelo domínio da sua API -->
     </domain-config>
 </network-security-config>

@@ -9,7 +9,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class ApiClient {
-    private static final String BASE_URL = "http://192.168.0.40:8080/";
+    private static final String BASE_URL = "http://seu ip:8080/";
 
     private OkHttpClient client;
 

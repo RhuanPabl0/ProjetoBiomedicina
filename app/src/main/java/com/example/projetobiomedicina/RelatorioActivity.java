@@ -117,7 +117,7 @@ public class RelatorioActivity extends AppCompatActivity {
         @Override
         protected List<JSONObject> doInBackground(String... strings) {
             String login = strings[0];
-            String apiUrl = "http://192.168.0.40:8080/resultadoexame/byUserLogin/" + login;
+            String apiUrl = "http://seu ip:8080/resultadoexame/byUserLogin/" + login;
             List<JSONObject> dadosExames = new ArrayList<>();
 
             try {
